@@ -14,6 +14,7 @@ class JasonGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.tor_enabled = False
+        self.autostart_enabled = False
         self.ramwipe_enabled = False
         self.wipe_enabled = False
         self.init_ui()
@@ -47,38 +48,38 @@ class JasonGUI(QMainWindow):
         main_layout.addSpacing(20)
         
         # Create buttons with dark theme
-        self.tor_button = self.create_dark_button("Enable Jason Tor")
-        self.change_tor_button = self.create_dark_button("Change Tor ID")
+        self.tor_button = self.create_dark_button("Start Tor Routing")
+        self.autostart_button = self.create_dark_button("Enable Autostart")
+        self.autowipe_button = self.create_dark_button("Enable Auto Wipe")
         self.restart_tor_button = self.create_dark_button("Restart Tor")
-        self.ip_check_button = self.create_dark_button("IP Check")
-        self.autowipe_button = self.create_dark_button("Enable Jason Autowipe")
-        self.wipe_button = self.create_dark_button("Enable Jason Wipe")
-        self.about_button = self.create_dark_button("About Jason")
+        self.ip_check_button = self.create_dark_button("Check IP")
+        self.about_button = self.create_dark_button("About")
+        self.exit_button = self.create_dark_button("Exit")
         
         # Add buttons to layout
         main_layout.addWidget(self.tor_button)
         main_layout.addSpacing(10)
-        main_layout.addWidget(self.change_tor_button)
+        main_layout.addWidget(self.autostart_button)
+        main_layout.addSpacing(10)
+        main_layout.addWidget(self.autowipe_button)
         main_layout.addSpacing(10)
         main_layout.addWidget(self.restart_tor_button)
         main_layout.addSpacing(10)
         main_layout.addWidget(self.ip_check_button)
         main_layout.addSpacing(20)
-        main_layout.addWidget(self.autowipe_button)
-        main_layout.addSpacing(10)
-        main_layout.addWidget(self.wipe_button)
-        main_layout.addSpacing(30)
         main_layout.addWidget(self.about_button)
+        main_layout.addSpacing(10)
+        main_layout.addWidget(self.exit_button)
         main_layout.addStretch()
         
         # Set up button connections
         self.tor_button.clicked.connect(self.toggle_tor)
-        self.change_tor_button.clicked.connect(self.change_tor_id)
+        self.autostart_button.clicked.connect(self.toggle_autostart)
+        self.autowipe_button.clicked.connect(self.toggle_autowipe)
         self.restart_tor_button.clicked.connect(self.restart_tor)
         self.ip_check_button.clicked.connect(self.check_ip)
-        self.autowipe_button.clicked.connect(self.toggle_autowipe)
-        self.wipe_button.clicked.connect(self.toggle_wipe)
         self.about_button.clicked.connect(self.show_about)
+        self.exit_button.clicked.connect(self.close)
         
         # Set the central widget
         self.setCentralWidget(main_widget)
@@ -134,61 +135,70 @@ class JasonGUI(QMainWindow):
             except:
                 pass
                 
-            self.update_button_text(self.tor_button, "Jason Tor", self.tor_enabled)
+            # Update Tor button text
+            if self.tor_enabled:
+                self.tor_button.setText("Stop Tor Routing")
+            else:
+                self.tor_button.setText("Start Tor Routing")
                 
         except Exception as e:
             print(f"Error checking Tor status: {e}")
+        
+        # Check Autostart status (jason-tor service enabled at boot)
+        try:
+            result = subprocess.run(['systemctl', 'is-enabled', '--quiet', 'jason-tor'],
+                                   check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.autostart_enabled = (result.returncode == 0)
+            
+            # Update Autostart button text
+            if self.autostart_enabled:
+                self.autostart_button.setText("Disable Autostart")
+            else:
+                self.autostart_button.setText("Enable Autostart")
+                
+        except Exception as e:
+            print(f"Error checking Autostart status: {e}")
         
         # Check Autowipe status (jason-autowipe service)
         try:
             result = subprocess.run(['systemctl', 'is-enabled', '--quiet', 'jason-autowipe'],
                                    check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.autowipe_enabled = (result.returncode == 0)
-            self.update_button_text(self.autowipe_button, "Jason Autowipe", self.autowipe_enabled)
+            
+            # Update Autowipe button text
+            if self.autowipe_enabled:
+                self.autowipe_button.setText("Disable Auto Wipe")
+            else:
+                self.autowipe_button.setText("Enable Auto Wipe")
+                
         except Exception as e:
             print(f"Error checking Autowipe status: {e}")
-            
-        # Check Wipe status (jason-wipe service)
-        try:
-            result = subprocess.run(['systemctl', 'is-enabled', '--quiet', 'jason-wipe'],
-                                   check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            self.wipe_enabled = (result.returncode == 0)
-            self.update_button_text(self.wipe_button, "Jason Wipe", self.wipe_enabled)
-        except Exception as e:
-            print(f"Error checking Wipe status: {e}")
-    
-    def update_button_text(self, button, service_name, is_enabled):
-        """Update button text based on service status"""
-        if is_enabled:
-            button.setText(f"Disable {service_name}")
-        else:
-            button.setText(f"Enable {service_name}")
     
     def toggle_tor(self):
-        """Toggle Tor service"""
+        """Toggle Tor routing service"""
         if self.tor_enabled:
             # Disable Tor
             try:
                 subprocess.run(['sudo', '/usr/bin/jason', 'stop'], 
                               check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 self.tor_enabled = False
-                self.update_button_text(self.tor_button, "Jason Tor", False)
-                QMessageBox.information(self, "Jason", "Tor disabled successfully.")
+                self.tor_button.setText("Start Tor Routing")
+                QMessageBox.information(self, "Jason", "Tor routing disabled successfully.")
             except subprocess.CalledProcessError:
-                QMessageBox.critical(self, "Error", "Failed to disable Tor. Check logs for details.")
+                QMessageBox.critical(self, "Error", "Failed to disable Tor routing. Check logs for details.")
         else:
             # Enable Tor
             try:
                 subprocess.run(['sudo', '/usr/bin/jason', 'start'], 
                               check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 self.tor_enabled = True
-                self.update_button_text(self.tor_button, "Jason Tor", True)
-                QMessageBox.information(self, "Jason", "Tor enabled successfully.")
+                self.tor_button.setText("Stop Tor Routing")
+                QMessageBox.information(self, "Jason", "Tor routing enabled successfully.")
             except subprocess.CalledProcessError:
-                QMessageBox.critical(self, "Error", "Failed to enable Tor. Check logs for details.")
+                QMessageBox.critical(self, "Error", "Failed to enable Tor routing. Check logs for details.")
     
     def toggle_autowipe(self):
-        """Toggle Autowipe service"""
+        """Toggle Auto Wipe service"""
         if self.autowipe_enabled:
             # Disable Autowipe
             try:
@@ -197,10 +207,10 @@ class JasonGUI(QMainWindow):
                 subprocess.run(['sudo', 'systemctl', 'disable', 'jason-autowipe'], 
                               check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 self.autowipe_enabled = False
-                self.update_button_text(self.autowipe_button, "Jason Autowipe", False)
-                QMessageBox.information(self, "Jason", "Autowipe disabled successfully.")
+                self.autowipe_button.setText("Enable Auto Wipe")
+                QMessageBox.information(self, "Jason", "Auto Wipe disabled successfully.")
             except subprocess.CalledProcessError:
-                QMessageBox.critical(self, "Error", "Failed to disable Autowipe. Check logs for details.")
+                QMessageBox.critical(self, "Error", "Failed to disable Auto Wipe. Check logs for details.")
         else:
             # Enable Autowipe
             try:
@@ -209,10 +219,62 @@ class JasonGUI(QMainWindow):
                 subprocess.run(['sudo', 'systemctl', 'start', 'jason-autowipe'], 
                               check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 self.autowipe_enabled = True
-                self.update_button_text(self.autowipe_button, "Jason Autowipe", True)
-                QMessageBox.information(self, "Jason", "Autowipe enabled successfully.")
+                self.autowipe_button.setText("Disable Auto Wipe")
+                QMessageBox.information(self, "Jason", "Auto Wipe enabled successfully.")
             except subprocess.CalledProcessError:
-                QMessageBox.critical(self, "Error", "Failed to enable Autowipe. Check logs for details.")
+                QMessageBox.critical(self, "Error", "Failed to enable Auto Wipe. Check logs for details.")
+            
+    def toggle_autostart(self):
+        """Toggle Autostart for Jason"""
+        if self.autostart_enabled:
+            # Disable Autostart
+            try:
+                # Remove from systemd boot
+                subprocess.run(['sudo', 'systemctl', 'disable', 'jason-tor'], 
+                              check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.autostart_enabled = False
+                self.autostart_button.setText("Enable Autostart")
+                QMessageBox.information(self, "Jason", "Autostart disabled successfully.")
+            except subprocess.CalledProcessError:
+                QMessageBox.critical(self, "Error", "Failed to disable Autostart. Check logs for details.")
+        else:
+            # Enable Autostart
+            try:
+                # Add to systemd boot
+                subprocess.run(['sudo', 'systemctl', 'enable', 'jason-tor'], 
+                              check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.autostart_enabled = True
+                self.autostart_button.setText("Disable Autostart")
+                QMessageBox.information(self, "Jason", "Autostart enabled successfully.")
+            except subprocess.CalledProcessError:
+                QMessageBox.critical(self, "Error", "Failed to enable Autostart. Check logs for details.")
+                
+    def toggle_wipe(self):
+        """Toggle Wipe service"""
+        if self.wipe_enabled:
+            # Disable Wipe
+            try:
+                subprocess.run(['sudo', 'systemctl', 'stop', 'jason-wipe'], 
+                              check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                subprocess.run(['sudo', 'systemctl', 'disable', 'jason-wipe'], 
+                              check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.wipe_enabled = False
+                self.update_button_text(self.wipe_button, "Jason Wipe", False)
+                QMessageBox.information(self, "Jason", "Wipe disabled successfully.")
+            except subprocess.CalledProcessError:
+                QMessageBox.critical(self, "Error", "Failed to disable Wipe. Check logs for details.")
+        else:
+            # Enable Wipe
+            try:
+                subprocess.run(['sudo', 'systemctl', 'enable', 'jason-wipe'], 
+                              check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                subprocess.run(['sudo', 'systemctl', 'start', 'jason-wipe'], 
+                              check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.wipe_enabled = True
+                self.update_button_text(self.wipe_button, "Jason Wipe", True)
+                QMessageBox.information(self, "Jason", "Wipe enabled successfully.")
+            except subprocess.CalledProcessError:
+                QMessageBox.critical(self, "Error", "Failed to enable Wipe. Check logs for details.")
     
 
     def change_tor_id(self):
@@ -300,7 +362,7 @@ class JasonGUI(QMainWindow):
     def show_about(self):
         """Show information about Jason"""
         about_text = """<b>Jason Privacy Tool</b><br><br>
-        Jason is a comprehensive privacy and security tool designed to protect your digital footprint.<br>
+        Jason is a comprehensive privacy and security tool designed to protect your digital fingerprint.<br>
         <br>
         <b>Features:</b><br>
         • Route all traffic through Tor for anonymity<br>

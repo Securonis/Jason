@@ -47,7 +47,7 @@ start_tor_routing() {
     echo "Starting Tor routing..."
     sudo jason start
     if [ $? -eq 0 ]; then
-        echo "Tor routing started successfully. You are under Jason tunnel"
+        echo "Tor routing started successfully."
     else
         echo "Failed to start Tor routing."
     fi

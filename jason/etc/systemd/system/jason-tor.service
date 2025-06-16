@@ -1,0 +1,15 @@
+[Unit]
+Description=Jason Tor Privacy Service
+After=network.target tor.service
+Wants=tor.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/jason start
+ExecStop=/usr/bin/jason stop
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

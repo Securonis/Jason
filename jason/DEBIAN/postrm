@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Restore original Tor configuration if it exists
+if [ -e /etc/tor/torrc.orig ]; then
+  mv /etc/tor/torrc.orig /etc/tor/torrc
+fi
+
+# Remove Jason sysctl settings if they exist
+if [ -f /etc/sysctl.d/98-jason-privacy.conf ]; then
+  rm -f /etc/sysctl.d/98-jason-privacy.conf
+  sysctl --system > /dev/null 2>&1
+fi
+
+# Log uninstallation
+logger "Jason package was removed"

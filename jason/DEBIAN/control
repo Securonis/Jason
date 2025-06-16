@@ -1,0 +1,15 @@
+Package: jason
+Version: 1.0
+Architecture: all
+Maintainer: root0emir
+Installed-Size: 64
+Depends: tor, secure-delete, python3-pyqt5, systemd, bleachbit
+Recommends: socat, gufw, proxychains, openvpn
+Section: net
+Priority: optional
+Description: Jason - Privacy and Security Tool
+  Jason provides privacy and security features including:
+  * Tor anonymizing
+  * RAM wiping on shutdown
+  * Full memory wiping capabilities
+  * Modern GUI interface with dark theme

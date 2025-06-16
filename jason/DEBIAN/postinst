@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+# Backup original Tor configuration
+if [ -e /etc/tor/torrc ]; then
+  mv /etc/tor/torrc /etc/tor/torrc.orig
+fi
+
+# Install Jason Tor configuration
+if [ -e /etc/tor/torrc.anon ]; then
+  mv /etc/tor/torrc.anon /etc/tor/torrc
+fi
+
+# Setup permissions for Jason scripts
+chmod +x /usr/bin/jason
+chmod +x /usr/bin/jason-gui.py
+chmod +x /usr/bin/jason-autowipe
+chmod +x /usr/bin/jason-wipe
+
+# Create a desktop entry for Jason GUI
+cat > /usr/share/applications/jason.desktop << EOF
+[Desktop Entry]
+Name=Jason
+Comment=Privacy and Security Tool
+Exec=pkexec /usr/bin/jason-gui.py
+Icon=preferences-system-privacy
+Terminal=false
+Type=Application
+Categories=System;Security;
+StartupNotify=true
+Keywords=privacy;security;tor;wipe;
+EOF
+
+# Install systemd services
+cp /etc/systemd/system/jason-wipe.service /lib/systemd/system/
+systemctl daemon-reload
+
+# Make sure the autowipe service is properly installed
+cp /jason-autowipe.service /lib/systemd/system/
+mkdir -p /usr/bin
+cp /jason-autowipe /usr/bin/
+chmod +x /usr/bin/jason-autowipe
+
+# Log installation
+logger "Jason package installed successfully"
+
+exit 0

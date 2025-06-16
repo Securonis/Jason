@@ -13,7 +13,6 @@ fi
 
 # Setup permissions for Jason scripts
 chmod +x /usr/bin/jason
-chmod +x /usr/bin/jason-gui
 chmod +x /usr/bin/jason-autowipe
 chmod +x /etc/init.d/jason
 chmod +x /etc/init.d/jason-autowipe

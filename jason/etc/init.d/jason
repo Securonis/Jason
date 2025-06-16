@@ -95,6 +95,11 @@ function enable_ipv6() {
     service nscd start > /dev/null 2>&1
     service dnsmasq start > /dev/null 2>&1
 
+    if [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)" != "0" ]; then
+    echo -e "$RED Failed to forcibly reenable IPv6$RESETCOLOR"
+    # return 1
+    fi
+
     echo -e "$GREEN IPv6 successfully enabled$RESETCOLOR"
     return 0
 }

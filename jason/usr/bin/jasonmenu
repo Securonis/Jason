@@ -1,0 +1,205 @@
+#!/bin/bash
+
+# Jason CLI Menu
+# Author: root0emir
+
+# Check if running as root
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root. Restarting with sudo..."
+    exec sudo "$0" "$@"
+fi
+
+clear
+
+show_ascii_art() {
+cat << "EOF"
+     _   _    ____   ___  _   _ 
+    | | / \  / ___| / _ \| \ | |
+ _  | |/ _ \ \___ \| | | |  \| |
+| |_| / ___ \ ___) | |_| | |\  |
+ \___/_/   \_\____/ \___/|_| \_|
+EOF
+echo
+}
+
+show_menu() {
+    echo "==========================================="
+    echo "            JASON CLI MENU                "  
+    echo "==========================================="
+    echo " 1) Start Tor Routing"
+    echo " 2) Disable Tor Routing"
+    echo " 3) Check Tor Status"
+    echo " 4) Check IP"
+    echo " 5) Jason Status"
+    echo " 6) Enable Tor Routing Autostart"
+    echo " 7) Disable Tor Routing Autostart"
+    echo " 8) Enable Jason Autowipe"
+    echo " 9) Disable Jason Autowipe"
+    echo "10) Help"
+    echo "11) About"
+    echo " 0) Exit"
+    echo "==========================================="
+    echo -n "Select an option [0-11]: "
+}
+
+start_tor_routing() {
+    echo "Starting Tor routing..."
+    systemctl start jason-tor
+    if [ $? -eq 0 ]; then
+        echo "Tor routing started successfully."
+    else
+        echo "Failed to start Tor routing."
+    fi
+    read -p "Press Enter to continue..."
+}
+
+disable_tor_routing() {
+    echo "Disabling Tor routing..."
+    systemctl stop jason-tor
+    if [ $? -eq 0 ]; then
+        echo "Tor routing disabled successfully."
+    else
+        echo "Failed to disable Tor routing."
+    fi
+    read -p "Press Enter to continue..."
+}
+
+check_tor_status() {
+    echo "Checking Tor status..."
+    echo "Tor Service Status:"
+    systemctl status tor | grep -E "Active:|Loaded:"
+    read -p "Press Enter to continue..."
+}
+
+check_ip() {
+    echo "Checking your current IP address..."
+    echo "This may take a moment, please wait..."
+    curl -s https://check.torproject.org | grep -E "(Sorry|Congratulations)"
+    echo "Detailed IP information:"
+    curl -s ifconfig.me
+    echo
+    read -p "Press Enter to continue..."
+}
+
+jason_status() {
+    echo "Checking Jason services status..."
+    echo "Tor Routing Service:"
+    systemctl status jason-tor | grep -E "Active:|Loaded:"
+    echo "Autowipe Service:"
+    systemctl status jason-autowipe 2>/dev/null | grep -E "Active:|Loaded:" || echo "Autowipe service not found."
+    read -p "Press Enter to continue..."
+}
+
+enable_tor_autostart() {
+    echo "Enabling Tor routing autostart..."
+    systemctl enable jason-tor
+    if [ $? -eq 0 ]; then
+        echo "Tor routing autostart enabled."
+    else
+        echo "Failed to enable Tor routing autostart."
+    fi
+    read -p "Press Enter to continue..."
+}
+
+disable_tor_autostart() {
+    echo "Disabling Tor routing autostart..."
+    systemctl disable jason-tor
+    if [ $? -eq 0 ]; then
+        echo "Tor routing autostart disabled."
+    else
+        echo "Failed to disable Tor routing autostart."
+    fi
+    read -p "Press Enter to continue..."
+}
+
+enable_autowipe() {
+    echo "Enabling Jason autowipe..."
+    systemctl enable jason-autowipe
+    systemctl start jason-autowipe
+    if [ $? -eq 0 ]; then
+        echo "Jason autowipe enabled."
+    else
+        echo "Failed to enable Jason autowipe."
+    fi
+    read -p "Press Enter to continue..."
+}
+
+disable_autowipe() {
+    echo "Disabling Jason autowipe..."
+    systemctl stop jason-autowipe
+    systemctl disable jason-autowipe
+    if [ $? -eq 0 ]; then
+        echo "Jason autowipe disabled."
+    else
+        echo "Failed to disable Jason autowipe."
+    fi
+    read -p "Press Enter to continue..."
+}
+
+show_help() {
+    echo "==========================================="
+    echo "              JASON HELP                  "
+    echo "==========================================="
+    echo "Jason is a privacy and security tool that helps"
+    echo "protect your digital fingerprint and anonymize"
+    echo "your internet traffic."
+    echo
+    echo "Key Features:"
+    echo "- Tor Routing: Routes all traffic through the Tor network"
+    echo "- Autowipe: Automatically wipes RAM to prevent data recovery"
+    echo "- IP Checking: Verify your anonymization status"
+    echo
+    echo "Commands Overview:"
+    echo "1-2: Control Tor routing (on/off)"
+    echo "3-5: Check status of services"
+    echo "6-9: Configure autostart settings"
+    echo
+    echo "For more details, visit: https://github.com/Securonis/Jason"
+    echo "==========================================="
+    read -p "Press Enter to continue..."
+}
+
+show_about() {
+    echo "==========================================="
+    echo "              ABOUT JASON                 "
+    echo "==========================================="
+    echo "Jason Privacy and Security Tool"
+    echo "Version: 1.0"
+    echo "Author: root0emir"
+    echo
+    echo "Jason is a comprehensive privacy and security tool"
+    echo "designed to protect your digital fingerprint and"
+    echo "provide enhanced anonymity while browsing."
+    echo
+    echo "This tool is open-source software distributed under"
+    echo 
+    echo
+    echo "Report bugs and issues at:"
+    echo "https://github.com/Securonis/Jason"
+    echo "==========================================="
+    read -p "Press Enter to continue..."
+}
+
+# Main program loop
+while true; do
+    clear
+    show_ascii_art
+    show_menu
+    read choice
+    
+    case $choice in
+        1) start_tor_routing ;;
+        2) disable_tor_routing ;;
+        3) check_tor_status ;;
+        4) check_ip ;;
+        5) jason_status ;;
+        6) enable_tor_autostart ;;
+        7) disable_tor_autostart ;;
+        8) enable_autowipe ;;
+        9) disable_autowipe ;;
+        10) show_help ;;
+        11) show_about ;;
+        0) clear; echo "Exiting Jason Menu. Goodbye!"; exit 0 ;;
+        *) echo "Invalid option. Press Enter to continue..."; read ;;
+    esac
+done

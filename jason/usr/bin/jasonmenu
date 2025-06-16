@@ -76,7 +76,7 @@ change_tor_id() {
     echo "Changing Tor identity..."
     sudo jason change
     if [ $? -eq 0 ]; then
-        echo "Tor daemon reloaded and forced to change nodes."
+        echo "Tor identity changed successfully."
     else
         echo "Failed to change Tor identity. Make sure Tor is running."
     fi

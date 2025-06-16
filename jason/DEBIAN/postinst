@@ -17,6 +17,7 @@ chmod +x /usr/bin/jason-gui
 chmod +x /usr/bin/jason-autowipe
 chmod +x /etc/init.d/jason
 chmod +x /etc/init.d/jason-autowipe
+chmod +x /usr/bin/jasonmenu
 
 
 # Create a desktop entry for Jason GUI

@@ -11,5 +11,10 @@ if [ -f /etc/sysctl.d/98-jason-privacy.conf ]; then
   sysctl --system > /dev/null 2>&1
 fi
 
+# Remove desktop entry if it exists
+if [ -f /usr/share/applications/jason.desktop ]; then
+  rm -f /usr/share/applications/jason.desktop
+fi
+
 # Log uninstallation
 logger "Jason package was removed"

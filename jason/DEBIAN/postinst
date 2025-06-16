@@ -24,7 +24,7 @@ cat > /usr/share/applications/jason.desktop << EOF
 [Desktop Entry]
 Name=Jason
 Comment=Tor transparent proxy and autowipe tool
-Exec=pkexec /usr/bin/jason-gui
+Exec=sudo /usr/bin/jasonmenu
 Icon=/usr/share/icons/securonis/jason.png
 Terminal=false
 Type=Application

@@ -32,7 +32,7 @@ Keywords=privacy;security;tor;wipe;
 EOF
 
 # Install systemd services
-cp /etc/systemd/system/jason-wipe.service /lib/systemd/system/
+cp /etc/systemd/system/jason-autowipe.service /lib/systemd/system/
 systemctl daemon-reload
 
 # Make sure the autowipe service is properly installed

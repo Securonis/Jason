@@ -23,12 +23,11 @@ cat > /usr/share/applications/jason.desktop << EOF
 Name=Jason
 Comment=Privacy and Security Tool
 Exec=pkexec /usr/bin/jason-gui.py
-Icon=preferences-system-privacy
+Icon=/usr/share/icons/securonis/jason.png
 Terminal=false
 Type=Application
-Categories=System;Security;
+Categories=Securonis;Securonis;
 StartupNotify=true
-Keywords=privacy;security;tor;wipe;
 EOF
 
 # Install systemd services

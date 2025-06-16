@@ -2,7 +2,7 @@
 set -e
 
 [Unit]
-Description=Pandora module - shutdown ram cleaner
+Description=Jason shutdown ram cleaner
 After=umountroot.target
 Before=shutdown.target reboot.target halt.target
 DefaultDependencies=no

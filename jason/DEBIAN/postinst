@@ -15,7 +15,7 @@ fi
 chmod +x /usr/bin/jason
 chmod +x /usr/bin/jason-gui.py
 chmod +x /usr/bin/jason-autowipe
-chmod +x /usr/bin/jason-wipe
+
 
 # Create a desktop entry for Jason GUI
 cat > /usr/share/applications/jason.desktop << EOF

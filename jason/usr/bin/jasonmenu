@@ -13,40 +13,44 @@ clear
 
 show_ascii_art() {
 cat << "EOF"
-     _   _    ____   ___  _   _ 
-    | | / \  / ___| / _ \| \ | |
- _  | |/ _ \ \___ \| | | |  \| |
-| |_| / ___ \ ___) | |_| | |\  |
- \___/_/   \_\____/ \___/|_| \_|
+       _                          
+      (_)                         
+       _ ___  ____ ___  ____  ___ 
+      | / _ \/ _  / _ \|  _ \/ _ \
+      | |  __/ (_| | | | | | | | | |
+      | |\___\____|_| |_|_| |_| |_|
+     _/ |                         
+    |__/    Privacy & Security Tool
 EOF
 echo
 }
 
 show_menu() {
     echo "==========================================="
-    echo "            JASON CLI MENU                "  
+    echo "   JASON MENU - PRIVACY & SECURITY TOOL   "
     echo "==========================================="
     echo " 1) Start Tor Routing"
     echo " 2) Disable Tor Routing"
-    echo " 3) Check Tor Status"
-    echo " 4) Check IP"
-    echo " 5) Jason Status"
-    echo " 6) Enable Tor Routing Autostart"
-    echo " 7) Disable Tor Routing Autostart"
-    echo " 8) Enable Jason Autowipe"
-    echo " 9) Disable Jason Autowipe"
-    echo "10) Help"
-    echo "11) About"
+    echo " 3) Change Tor ID"
+    echo " 4) Check Tor Status"
+    echo " 5) Check IP"
+    echo " 6) Jason Status"
+    echo " 7) Enable Tor Routing Autostart"
+    echo " 8) Disable Tor Routing Autostart"
+    echo " 9) Enable Jason Autowipe"
+    echo "10) Disable Jason Autowipe"
+    echo "11) Help"
+    echo "12) About"
     echo " 0) Exit"
     echo "==========================================="
-    echo -n "Select an option [0-11]: "
+    echo -n "Select an option [0-12]: "
 }
 
 start_tor_routing() {
     echo "Starting Tor routing..."
-    systemctl start jason-tor
+    sudo jason start
     if [ $? -eq 0 ]; then
-        echo "Tor routing started successfully."
+        echo "Tor routing started successfully. You are under Jason tunnel"
     else
         echo "Failed to start Tor routing."
     fi
@@ -55,7 +59,7 @@ start_tor_routing() {
 
 disable_tor_routing() {
     echo "Disabling Tor routing..."
-    systemctl stop jason-tor
+    sudo jason stop
     if [ $? -eq 0 ]; then
         echo "Tor routing disabled successfully."
     else
@@ -68,6 +72,17 @@ check_tor_status() {
     echo "Checking Tor status..."
     echo "Tor Service Status:"
     systemctl status tor | grep -E "Active:|Loaded:"
+    read -p "Press Enter to continue..."
+}
+
+change_tor_id() {
+    echo "Changing Tor identity..."
+    sudo jason change
+    if [ $? -eq 0 ]; then
+        echo "Tor daemon reloaded and forced to change nodes."
+    else
+        echo "Failed to change Tor identity. Make sure Tor is running."
+    fi
     read -p "Press Enter to continue..."
 }
 
@@ -151,8 +166,9 @@ show_help() {
     echo
     echo "Commands Overview:"
     echo "1-2: Control Tor routing (on/off)"
-    echo "3-5: Check status of services"
-    echo "6-9: Configure autostart settings"
+    echo "3: Change Tor identity"
+    echo "4-6: Check status of services"
+    echo "7-10: Configure autostart settings"
     echo
     echo "For more details, visit: https://github.com/Securonis/Jason"
     echo "==========================================="
@@ -190,15 +206,16 @@ while true; do
     case $choice in
         1) start_tor_routing ;;
         2) disable_tor_routing ;;
-        3) check_tor_status ;;
-        4) check_ip ;;
-        5) jason_status ;;
-        6) enable_tor_autostart ;;
-        7) disable_tor_autostart ;;
-        8) enable_autowipe ;;
-        9) disable_autowipe ;;
-        10) show_help ;;
-        11) show_about ;;
+        3) change_tor_id ;;
+        4) check_tor_status ;;
+        5) check_ip ;;
+        6) jason_status ;;
+        7) enable_tor_autostart ;;
+        8) disable_tor_autostart ;;
+        9) enable_autowipe ;;
+        10) disable_autowipe ;;
+        11) show_help ;;
+        12) show_about ;;
         0) clear; echo "Exiting Jason Menu. Goodbye!"; exit 0 ;;
         *) echo "Invalid option. Press Enter to continue..."; read ;;
     esac

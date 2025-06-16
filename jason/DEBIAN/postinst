@@ -13,7 +13,7 @@ fi
 
 # Setup permissions for Jason scripts
 chmod +x /usr/bin/jason
-chmod +x /usr/bin/jason-gui.py
+chmod +x /usr/bin/jason-gui
 chmod +x /usr/bin/jason-autowipe
 
 
@@ -22,7 +22,7 @@ cat > /usr/share/applications/jason.desktop << EOF
 [Desktop Entry]
 Name=Jason
 Comment=Privacy and Security Tool
-Exec=pkexec /usr/bin/jason-gui.py
+Exec=pkexec /usr/bin/jason-gui
 Icon=/usr/share/icons/securonis/jason.png
 Terminal=false
 Type=Application

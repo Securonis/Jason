@@ -12,7 +12,7 @@ set -e
 ### END INIT INFO
 
 
-function bomb {
+function wipe {
 	echo "starting jason auto wipe "
 	sleep 5
     echo "Pandora is dropping caches"
@@ -21,7 +21,7 @@ function bomb {
     echo 1  > /proc/sys/vm/oom_kill_allocating_task
     echo 1  > /proc/sys/vm/overcommit_memory
     echo 0  > /proc/sys/vm/oom_dump_tasks
-    echo "Pandora is bombing RAM"
+    echo "Jason is wiping RAM"
     sdmem -fllv
     echo " - RAM cleared"
     echo "closing jason auto wipe"
@@ -30,17 +30,17 @@ function bomb {
 
 case "$1" in
         start)
-                echo "Argument '$1' is not supported, use bomb instead"
+                echo "Argument '$1' is not supported, use wipe instead"
         ;;
         restart|reload|force-reload)
-                echo "Error: argument '$1' is not supported, use bomb instead"
+                echo "Error: argument '$1' is not supported, use wipe instead"
         ;;
         stop)
-              bomb  
+              wipe  
         ;;
-        bomb)
-              bomb
+        wipe)
+              wipe
         ;;
         *)
-              echo "USAGE: bomb "
+              echo "USAGE: wipe "
 esac

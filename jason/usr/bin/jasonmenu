@@ -86,7 +86,7 @@ change_tor_id() {
 check_ip() {
     echo "Checking your current IP address..."
     echo "This may take a moment, please wait..."
-    curl -s https://check.torproject.org | grep -E "(Sorry|Congratulations)"
+    curl -s https://check.torproject.org | grep -E "(Sorry|Congratulations)" | head -n 1
     echo "Detailed IP information:"
     curl -s ifconfig.me
     echo

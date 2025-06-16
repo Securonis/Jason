@@ -90,12 +90,6 @@ function enable_ipv6() {
         return 1
     fi
 
-    # Verify IPv6 is enabled
-    if [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)" != "0" ]; then
-        echo -e "$RED Failed to forcibly reenable IPv6$RESETCOLOR"
-        # return 1
-    fi
-
     # Restart network services
     service network-manager force-reload > /dev/null 2>&1
     service nscd start > /dev/null 2>&1

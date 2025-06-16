@@ -1,15 +1,14 @@
 [Unit]
-Description=Jason Tor Privacy Service
-After=network.target tor.service
+Description="Jason Tor Traffic Routing"
+Before=poweroff.target reboot.target tor.service
+After=network.target
 Wants=tor.service
 
 [Service]
-Type=forking
 ExecStart=/usr/bin/jason start
+ExecReload=/usr/bin/jason restart
 ExecStop=/usr/bin/jason stop
 RemainAfterExit=yes
-Restart=on-failure
-RestartSec=5s
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

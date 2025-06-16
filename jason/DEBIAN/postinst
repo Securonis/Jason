@@ -21,7 +21,7 @@ chmod +x /usr/bin/jason-autowipe
 cat > /usr/share/applications/jason.desktop << EOF
 [Desktop Entry]
 Name=Jason
-Comment=Privacy and Security Tool
+Comment=Tor transparent proxy and autowipe tool
 Exec=pkexec /usr/bin/jason-gui
 Icon=/usr/share/icons/securonis/jason.png
 Terminal=false
@@ -32,12 +32,11 @@ EOF
 
 # Install systemd services
 cp /etc/systemd/system/jason-autowipe.service /lib/systemd/system/
+cp /etc/systemd/system/jason-tor.service /lib/systemd/system/
 systemctl daemon-reload
 
-# Make sure the autowipe service is properly installed
-cp /jason-autowipe.service /lib/systemd/system/
+# Make sure the autowipe script is properly installed
 mkdir -p /usr/bin
-cp /jason-autowipe /usr/bin/
 chmod +x /usr/bin/jason-autowipe
 
 # Log installation

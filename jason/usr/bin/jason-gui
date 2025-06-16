@@ -20,18 +20,18 @@ class JasonGUI(QMainWindow):
         self.init_ui()
         
     def init_ui(self):
-        self.setWindowTitle('Jason - Privacy Tool')
-        self.setMinimumSize(600, 500)
+        self.setWindowTitle('Jason')
+        self.setMinimumSize(480, 400)
         
         # Set up the main widget and layout
         main_widget = QWidget()
         main_layout = QVBoxLayout(main_widget)
         
-        # Create a cream background
-        cream_palette = QPalette()
-        cream_palette.setColor(QPalette.Window, QColor(255, 253, 240))
-        cream_palette.setColor(QPalette.WindowText, QColor(30, 30, 30))
-        self.setPalette(cream_palette)
+        # Create a dark background
+        dark_palette = QPalette()
+        dark_palette.setColor(QPalette.Window, QColor(17, 17, 17))
+        dark_palette.setColor(QPalette.WindowText, QColor(240, 240, 240))
+        self.setPalette(dark_palette)
         
         # Title and description
         title_label = QLabel('JASON')
@@ -98,14 +98,17 @@ class JasonGUI(QMainWindow):
             QPushButton {
                 background-color: #2D2D2D;
                 color: #FFFFFF;
+                border: 2px solid #FFF7E5;
                 border-radius: 5px;
                 padding: 10px;
             }
             QPushButton:hover {
                 background-color: #3D3D3D;
+                border-color: #FFEECC;
             }
             QPushButton:pressed {
                 background-color: #1D1D1D;
+                border-color: #FFF7E5;
             }
         """)
         
@@ -316,46 +319,70 @@ class JasonGUI(QMainWindow):
         try:
             # Show warning about potential risk
             result = QMessageBox.warning(self, "Jason - Security Warning", 
-                                       "Checking your IP address may expose your system to fingerprinting risks.\n\n" 
-                                       "This is considered RISKY and only recommended if absolutely necessary.\n\n"
-                                       "Do you want to continue?", 
-                                       QMessageBox.Yes | QMessageBox.No)
+                                        "Checking your IP address may expose your system to fingerprinting risks.\n\n" 
+                                        "This is considered RISKY and only recommended if absolutely necessary.\n\n"
+                                        "Do you want to continue?", 
+                                        QMessageBox.Yes | QMessageBox.No)
             
             if result == QMessageBox.Yes:
                 # Show a "please wait" message
                 self.statusBar().showMessage("Checking IP, please wait...")
                 QApplication.processEvents()
                 
-                # Run the IP check command
-                process = subprocess.run(['sudo', '/usr/bin/jason', 'myip'], 
-                                       check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                       universal_newlines=True)
-                
-                # Extract the IP information from the output
-                output = process.stdout
-                
-                self.statusBar().clearMessage()
-                # Create a custom dialog to show the IP information
-                ip_dialog = QDialog(self)
-                ip_dialog.setWindowTitle("Your Current IP")
-                ip_dialog.setMinimumWidth(400)
-                ip_dialog.setMinimumHeight(300)
-                
-                layout = QVBoxLayout(ip_dialog)
-                
-                # Create a text browser to show the output with formatting preserved
-                text_browser = QTextBrowser()
-                text_browser.setText(output)
-                layout.addWidget(text_browser)
-                
-                # Add a close button
-                close_button = QPushButton("Close")
-                close_button.clicked.connect(ip_dialog.close)
-                layout.addWidget(close_button)
-                
-                ip_dialog.exec_()
-                
-        except subprocess.CalledProcessError as e:
+                try:
+                    # Use QProcess for better process handling
+                    process = QProcess()
+                    process.start('sudo', ['/usr/bin/jason', 'myip'])
+                    
+                    # Wait for the process with a timeout
+                    if not process.waitForFinished(30000):  # 30 second timeout
+                        process.kill()
+                        self.statusBar().clearMessage()
+                        QMessageBox.critical(self, "Error", "IP check timed out after 30 seconds")
+                        return
+                    
+                    # Get output bytes and convert to string safely
+                    output_bytes = process.readAllStandardOutput()
+                    output = str(output_bytes, 'utf-8', errors='replace')
+                    
+                    # Check if there was an error output
+                    error_bytes = process.readAllStandardError()
+                    error_output = str(error_bytes, 'utf-8', errors='replace')
+                    
+                    if process.exitCode() != 0 or error_output.strip():
+                        self.statusBar().clearMessage()
+                        QMessageBox.critical(self, "Error", 
+                                            f"IP check failed with exit code {process.exitCode()}\n\n{error_output}")
+                        return
+                    
+                    # If we get here, we have valid output
+                    self.statusBar().clearMessage()
+                    
+                    # Create a custom dialog to show the IP information
+                    ip_dialog = QDialog(self)
+                    ip_dialog.setWindowTitle("Your Current IP")
+                    ip_dialog.setMinimumWidth(400)
+                    ip_dialog.setMinimumHeight(300)
+                    
+                    layout = QVBoxLayout(ip_dialog)
+                    
+                    # Create a text browser to show the output with formatting preserved
+                    text_browser = QTextBrowser()
+                    text_browser.setText(output if output.strip() else "No IP information returned")
+                    layout.addWidget(text_browser)
+                    
+                    # Add a close button
+                    close_button = QPushButton("Close")
+                    close_button.clicked.connect(ip_dialog.close)
+                    layout.addWidget(close_button)
+                    
+                    ip_dialog.exec_()
+                    
+                except Exception as e:
+                    self.statusBar().clearMessage()
+                    QMessageBox.critical(self, "Error", f"IP check failed: {str(e)}")
+        
+        except Exception as e:
             self.statusBar().clearMessage()
             QMessageBox.critical(self, "Error", f"Failed to check IP address: {str(e)}")
     
@@ -385,6 +412,27 @@ class JasonGUI(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')  # Use Fusion style for a more modern look
+    
+    # Apply cream border styling to dialogs and message boxes
+    dialog_style = """
+        QDialog, QMessageBox {
+            background-color: #111111;
+            color: #FFFFFF;
+        }
+        QDialog QPushButton, QMessageBox QPushButton {
+            background-color: #2D2D2D;
+            color: #FFFFFF;
+            border: 2px solid #FFF7E5;
+            border-radius: 5px;
+            padding: 8px;
+            min-width: 80px;
+        }
+        QDialog QPushButton:hover, QMessageBox QPushButton:hover {
+            background-color: #3D3D3D;
+            border-color: #FFEECC;
+        }
+    """
+    app.setStyleSheet(dialog_style)
     window = JasonGUI()
     window.show()
     sys.exit(app.exec_())

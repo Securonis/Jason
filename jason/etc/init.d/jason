@@ -76,7 +76,7 @@ EOF
 }
 
 function enable_ipv6() {
-    echo -e "\n$GREEN[$BLUE i$GREEN ]$BLUE Reenabling IPv6 services:$RESETCOLOR\n"
+    echo -e "\n$GREEN[$BLUE i$GREEN ]$BLUE Restarting Network services:$RESETCOLOR\n"
 
     # Remove the config file if it exists
     if [ -f /etc/sysctl.d/98-jason-privacy.conf ]; then
@@ -95,13 +95,6 @@ function enable_ipv6() {
     service nscd start > /dev/null 2>&1
     service dnsmasq start > /dev/null 2>&1
 
-    if [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)" != "0" ]; then
-    echo -e "$RED Failed to forcibly reenable IPv6$RESETCOLOR"
-    # return 1
-    fi
-
-    echo -e "$GREEN IPv6 successfully enabled$RESETCOLOR"
-    return 0
 }
 
 
